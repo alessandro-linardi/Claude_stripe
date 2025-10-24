@@ -25,7 +25,7 @@ public class HardwareSku {
     private String product; // Hardware Product ID
 
     @SerializedName("orderable")
-    private Boolean orderable;
+    private Integer orderable;
 
     @SerializedName("status")
     private String status; // "available" or "unavailable"
@@ -85,11 +85,11 @@ public class HardwareSku {
         this.product = product;
     }
 
-    public Boolean getOrderable() {
+    public Integer getOrderable() {
         return orderable;
     }
 
-    public void setOrderable(Boolean orderable) {
+    public void setOrderable(Integer orderable) {
         this.orderable = orderable;
     }
 

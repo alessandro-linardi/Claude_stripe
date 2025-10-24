@@ -277,6 +277,38 @@ try {
 }
 ```
 
+## Known Issues & Regional Considerations
+
+### Preview Endpoint Availability
+
+The `/v1/terminal/hardware_orders/preview` endpoint may not be available for all regions or account types. If you encounter a 404 error when calling the preview endpoint, this is expected behavior. The example code has been updated to gracefully handle this:
+
+```java
+try {
+    HardwareOrder preview = stripe.hardwareOrders().preview(params);
+    // Use preview data
+} catch (StripeException e) {
+    // Preview not available, proceed with direct order creation
+    System.out.println("Preview endpoint not available for this region");
+}
+```
+
+You can still create orders directly without previewing them.
+
+### Orderable Field Type
+
+The `orderable` field in `HardwareSku` returns an integer (0 or 1) from Stripe's API, not a boolean. This library correctly handles this by using `Integer` type for the field:
+- `0` = not orderable
+- `1` = orderable
+
+Example usage:
+```java
+HardwareSku sku = stripe.hardwareSkus().retrieve("thsku_...");
+if (sku.getOrderable() != null && sku.getOrderable() == 1) {
+    // SKU is orderable
+}
+```
+
 ## Examples
 
 See the `src/main/java/com/stripe/terminal/examples/` directory for complete examples:

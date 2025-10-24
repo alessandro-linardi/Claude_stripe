@@ -22,9 +22,10 @@ public class HardwareOrderExample {
         StripeTerminal stripe = new StripeTerminal(apiKey);
 
         try {
-            // Step 1: Retrieve available SKUs for US market
-            System.out.println("=== Retrieving available SKUs ===");
-            StripeList<HardwareSku> skus = stripe.hardwareSkus().list("US");
+            // Step 1: Retrieve available SKUs for GB market (change to your country code: US, GB, CA, etc.)
+            String country = "GB"; // Change this to your country code
+            System.out.println("=== Retrieving available SKUs for " + country + " ===");
+            StripeList<HardwareSku> skus = stripe.hardwareSkus().list(country);
             System.out.println("Found " + skus.getData().size() + " SKUs");
 
             if (skus.getData().isEmpty()) {
@@ -37,11 +38,12 @@ public class HardwareOrderExample {
             System.out.println("Example SKU: " + firstSku.getId());
             System.out.println("  Price: " + firstSku.getAmount() + " " + firstSku.getCurrency());
             System.out.println("  Product: " + firstSku.getProduct());
+            System.out.println("  Orderable: " + firstSku.getOrderable());
             System.out.println();
 
-            // Step 2: Retrieve available shipping methods for US
+            // Step 2: Retrieve available shipping methods
             System.out.println("=== Retrieving shipping methods ===");
-            StripeList<ShippingMethod> shippingMethods = stripe.shippingMethods().list("US");
+            StripeList<ShippingMethod> shippingMethods = stripe.shippingMethods().list(country);
             System.out.println("Found " + shippingMethods.getData().size() + " shipping methods");
 
             if (shippingMethods.getData().isEmpty()) {
@@ -55,40 +57,48 @@ public class HardwareOrderExample {
             System.out.println("  Name: " + firstMethod.getName());
             System.out.println();
 
-            // Step 3: Create shipping details
+            // Step 3: Create shipping details (update to match your country)
             Address address = new Address(
-                "1234 Main Street",
-                "San Francisco",
-                "CA",
-                "94111",
-                "US"
+                "123 High Street",
+                "London",
+                null, // No state/province for GB
+                "EC1A 1BB",
+                "GB"
             );
 
             ShippingDetails shipping = new ShippingDetails(
-                "Jenny Rosen",
+                "John Smith",
                 address,
                 "test@example.com",
-                "15555555555"
+                "+447700900000"
             );
-            shipping.setCompany("Rocket Rides");
+            shipping.setCompany("Test Company Ltd");
 
             // Step 4: Preview the order (optional but recommended)
+            // Note: Preview endpoint may not be available for all regions/accounts
             System.out.println("=== Previewing order ===");
-            HardwareOrder preview = stripe.hardwareOrders().preview(
-                HardwareOrderService.HardwareOrderCreateParams.builder()
-                    .addHardwareOrderItem(firstSku.getId(), 2)
-                    .shippingMethod(firstMethod.getId())
-                    .shipping(shipping)
-                    .poNumber("PO-2024-001")
-                    .addMetadata("customer_id", "cus_123")
-                    .build()
-            );
+            try {
+                HardwareOrder preview = stripe.hardwareOrders().preview(
+                    HardwareOrderService.HardwareOrderCreateParams.builder()
+                        .addHardwareOrderItem(firstSku.getId(), 2)
+                        .shippingMethod(firstMethod.getId())
+                        .shipping(shipping)
+                        .poNumber("PO-2024-001")
+                        .addMetadata("customer_id", "cus_123")
+                        .build()
+                );
 
-            System.out.println("Order Preview:");
-            System.out.println("  Subtotal: " + preview.getAmount() + " " + preview.getCurrency());
-            System.out.println("  Tax: " + preview.getTax() + " " + preview.getCurrency());
-            System.out.println("  Total: " + (preview.getAmount() + preview.getTax()) + " " + preview.getCurrency());
-            System.out.println();
+                System.out.println("Order Preview:");
+                System.out.println("  Subtotal: " + preview.getAmount() + " " + preview.getCurrency());
+                System.out.println("  Tax: " + preview.getTax() + " " + preview.getCurrency());
+                System.out.println("  Total: " + (preview.getAmount() + preview.getTax()) + " " + preview.getCurrency());
+                System.out.println();
+            } catch (StripeException e) {
+                System.out.println("Preview endpoint not available (this is normal for some regions)");
+                System.out.println("  Error: " + e.getMessage());
+                System.out.println("  Proceeding to create order directly...");
+                System.out.println();
+            }
 
             // Step 5: Create the actual order
             System.out.println("=== Creating order ===");
