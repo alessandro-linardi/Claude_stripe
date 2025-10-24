@@ -204,7 +204,10 @@ Simulate order status transitions in sandbox:
 // Mark as ready to ship
 HardwareOrder order = stripe.testHelpers().markReadyToShip("thor_...");
 
-// Ship the order
+// Ship the order (carrier and tracking number are optional)
+HardwareOrder order = stripe.testHelpers().ship("thor_...");
+
+// Or ship with tracking information
 HardwareOrder order = stripe.testHelpers().ship("thor_...", "fedex", "1234567890");
 
 // Deliver the order

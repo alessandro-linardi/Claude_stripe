@@ -134,8 +134,8 @@ public class HardwareOrderExample {
                 HardwareOrder readyOrder = stripe.testHelpers().markReadyToShip(order.getId());
                 System.out.println("Order marked as ready_to_ship: " + readyOrder.getStatus());
 
-                // Mark as shipped
-                HardwareOrder shippedOrder = stripe.testHelpers().ship(order.getId(), "fedex", "1234567890");
+                // Mark as shipped (carrier and tracking number are optional)
+                HardwareOrder shippedOrder = stripe.testHelpers().ship(order.getId());
                 System.out.println("Order marked as shipped: " + shippedOrder.getStatus());
 
                 // Mark as delivered
