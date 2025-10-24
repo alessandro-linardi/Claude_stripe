@@ -57,48 +57,40 @@ public class HardwareOrderExample {
             System.out.println("  Name: " + firstMethod.getName());
             System.out.println();
 
-            // Step 3: Create shipping details (update to match your country)
+            // Step 3: Create shipping details with real UK address format
             Address address = new Address(
-                "123 High Street",
+                "1 Finsbury Avenue",  // Real London address
                 "London",
                 null, // No state/province for GB
-                "EC1A 1BB",
+                "EC2M 2PF",  // Valid London postcode
                 "GB"
             );
 
             ShippingDetails shipping = new ShippingDetails(
                 "John Smith",
                 address,
-                "test@example.com",
-                "+447700900000"
+                "john.smith@example.co.uk",
+                "+442071234567"  // Proper UK format: +44 (country) 20 (London) + number
             );
-            shipping.setCompany("Test Company Ltd");
+            shipping.setCompany("Example Ltd");
 
             // Step 4: Preview the order (optional but recommended)
-            // Note: Preview endpoint may not be available for all regions/accounts
             System.out.println("=== Previewing order ===");
-            try {
-                HardwareOrder preview = stripe.hardwareOrders().preview(
-                    HardwareOrderService.HardwareOrderCreateParams.builder()
-                        .addHardwareOrderItem(firstSku.getId(), 2)
-                        .shippingMethod(firstMethod.getId())
-                        .shipping(shipping)
-                        .poNumber("PO-2024-001")
-                        .addMetadata("customer_id", "cus_123")
-                        .build()
-                );
+            HardwareOrder preview = stripe.hardwareOrders().preview(
+                HardwareOrderService.HardwareOrderCreateParams.builder()
+                    .addHardwareOrderItem(firstSku.getId(), 2)
+                    .shippingMethod(firstMethod.getId())
+                    .shipping(shipping)
+                    .poNumber("PO-2024-001")
+                    .addMetadata("customer_id", "cus_123")
+                    .build()
+            );
 
-                System.out.println("Order Preview:");
-                System.out.println("  Subtotal: " + preview.getAmount() + " " + preview.getCurrency());
-                System.out.println("  Tax: " + preview.getTax() + " " + preview.getCurrency());
-                System.out.println("  Total: " + (preview.getAmount() + preview.getTax()) + " " + preview.getCurrency());
-                System.out.println();
-            } catch (StripeException e) {
-                System.out.println("Preview endpoint not available (this is normal for some regions)");
-                System.out.println("  Error: " + e.getMessage());
-                System.out.println("  Proceeding to create order directly...");
-                System.out.println();
-            }
+            System.out.println("Order Preview:");
+            System.out.println("  Subtotal: " + preview.getAmount() + " " + preview.getCurrency());
+            System.out.println("  Tax: " + preview.getTax() + " " + preview.getCurrency());
+            System.out.println("  Total: " + (preview.getAmount() + preview.getTax()) + " " + preview.getCurrency());
+            System.out.println();
 
             // Step 5: Create the actual order
             System.out.println("=== Creating order ===");
