@@ -54,6 +54,25 @@ public class StripeHttpClient {
     }
 
     /**
+     * Makes a GET request to the Stripe API with complex parameters.
+     */
+    public String getWithParams(String path, Map<String, Object> params) throws StripeException {
+        HttpUrl.Builder urlBuilder = HttpUrl.parse(config.getBaseUrl() + path).newBuilder();
+
+        if (params != null) {
+            addParamsToQuery(urlBuilder, params, "");
+        }
+
+        Request request = new Request.Builder()
+                .url(urlBuilder.build())
+                .get()
+                .headers(buildHeaders())
+                .build();
+
+        return executeRequest(request);
+    }
+
+    /**
      * Makes a POST request to the Stripe API.
      */
     public String post(String path, Map<String, Object> params) throws StripeException {
@@ -70,6 +89,41 @@ public class StripeHttpClient {
                 .build();
 
         return executeRequest(request);
+    }
+
+    /**
+     * Recursively adds parameters to query URL, handling nested objects and arrays.
+     */
+    private void addParamsToQuery(HttpUrl.Builder urlBuilder, Map<String, Object> params, String prefix) {
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            String key = prefix.isEmpty() ? entry.getKey() : prefix + "[" + entry.getKey() + "]";
+            Object value = entry.getValue();
+
+            if (value == null) {
+                continue;
+            }
+
+            if (value instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> nestedMap = (Map<String, Object>) value;
+                addParamsToQuery(urlBuilder, nestedMap, key);
+            } else if (value instanceof java.util.List) {
+                @SuppressWarnings("unchecked")
+                java.util.List<Object> list = (java.util.List<Object>) value;
+                for (int i = 0; i < list.size(); i++) {
+                    Object item = list.get(i);
+                    if (item instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> itemMap = (Map<String, Object>) item;
+                        addParamsToQuery(urlBuilder, itemMap, key + "[" + i + "]");
+                    } else {
+                        urlBuilder.addQueryParameter(key + "[]", item.toString());
+                    }
+                }
+            } else {
+                urlBuilder.addQueryParameter(key, value.toString());
+            }
+        }
     }
 
     /**

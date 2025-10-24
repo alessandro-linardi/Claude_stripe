@@ -277,23 +277,11 @@ try {
 }
 ```
 
-## Known Issues & Regional Considerations
+## Known Issues & Important Notes
 
-### Preview Endpoint Availability
+### Preview Endpoint Uses GET
 
-The `/v1/terminal/hardware_orders/preview` endpoint may not be available for all regions or account types. If you encounter a 404 error when calling the preview endpoint, this is expected behavior. The example code has been updated to gracefully handle this:
-
-```java
-try {
-    HardwareOrder preview = stripe.hardwareOrders().preview(params);
-    // Use preview data
-} catch (StripeException e) {
-    // Preview not available, proceed with direct order creation
-    System.out.println("Preview endpoint not available for this region");
-}
-```
-
-You can still create orders directly without previewing them.
+The `/v1/terminal/hardware_orders/preview` endpoint uses HTTP GET (not POST) unlike the create endpoint. This library correctly handles this difference automatically.
 
 ### Orderable Field Type
 

@@ -35,6 +35,7 @@ public class HardwareOrderService {
     /**
      * Previews a Terminal Hardware Order without creating it.
      * Useful for validation and showing total costs including taxes.
+     * Note: This endpoint uses GET instead of POST.
      *
      * @param params The order parameters
      * @return The previewed Hardware Order
@@ -42,7 +43,7 @@ public class HardwareOrderService {
      */
     public HardwareOrder preview(HardwareOrderCreateParams params) throws StripeException {
         Map<String, Object> requestParams = buildCreateParams(params);
-        String response = httpClient.post(BASE_PATH + "/preview", requestParams);
+        String response = httpClient.getWithParams(BASE_PATH + "/preview", requestParams);
         return httpClient.getGson().fromJson(response, HardwareOrder.class);
     }
 
